@@ -1,16 +1,12 @@
 package com.bibireden.data_attributes.ui.components.config.function
 
 import com.bibireden.data_attributes.DataAttributesClient
-import com.bibireden.data_attributes.api.DataAttributesAPI
 import com.bibireden.data_attributes.api.attribute.StackingBehavior
 import com.bibireden.data_attributes.config.DataAttributesConfigProviders.registryEntryToText
 import com.bibireden.data_attributes.config.functions.AttributeFunction
 import com.bibireden.data_attributes.mutable.MutableEntityAttribute
-import com.bibireden.data_attributes.ui.components.buttons.ButtonComponents
 import com.bibireden.data_attributes.ui.components.config.AttributeConfigComponent
-import com.bibireden.data_attributes.ui.components.config.AttributeOverrideComponent
 import com.bibireden.data_attributes.ui.components.config.ConfigDockComponent
-import com.bibireden.data_attributes.ui.components.config.entities.EntityTypesComponent
 import com.bibireden.data_attributes.ui.components.entries.DataEntryComponent
 import com.bibireden.data_attributes.ui.components.entries.EntryComponents
 import com.bibireden.data_attributes.ui.components.fields.FieldComponents
@@ -19,7 +15,6 @@ import com.bibireden.data_attributes.ui.renderers.ButtonRenderers
 import io.wispforest.owo.config.Option
 import io.wispforest.owo.config.ui.component.ConfigToggleButton
 import io.wispforest.owo.config.ui.component.SearchAnchorComponent
-import io.wispforest.owo.ui.component.ButtonComponent
 import io.wispforest.owo.ui.component.Components
 import io.wispforest.owo.ui.component.LabelComponent
 import io.wispforest.owo.ui.container.CollapsibleContainer
@@ -33,7 +28,6 @@ import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
-import java.util.concurrent.Flow
 
 class AttributeFunctionComponent(override var identifier: Identifier, private var function: AttributeFunction, private var parentId: Identifier, private val provider: AttributeFunctionProvider)
     : CollapsibleContainer(Sizing.content(), Sizing.content(), Text.of("<n/a>"), DataAttributesClient.UI_STATE.collapsible.functionChildren[parentId.toString()]?.get(identifier.toString()) ?: true),
@@ -43,8 +37,6 @@ class AttributeFunctionComponent(override var identifier: Identifier, private va
     override val registry: Registry<MutableEntityAttribute> = Registries.ATTRIBUTE as Registry<MutableEntityAttribute>
 
     private val backing = provider.backing
-
-    override val isDefault get() = provider.backing[parentId]?.get(identifier) == null
 
     private fun updateEntryToBacking(id: Identifier, function: AttributeFunction) {
         backing.computeIfAbsent(parentId) { mutableMapOf() }[id] = function
@@ -57,7 +49,7 @@ class AttributeFunctionComponent(override var identifier: Identifier, private va
     }
 
     private fun updateTextLabel() {
-        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, isDefault))
+        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, false))
     }
 
     private val toggleButton = ConfigToggleButton().enabled(function.enabled).also {
@@ -84,9 +76,6 @@ class AttributeFunctionComponent(override var identifier: Identifier, private va
             !isRegistered -> {
                 titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.invalid"))
             }
-            isDefault -> {
-                titleLayout().tooltip(Text.translatable("text.config.data_attributes_data_entry.default"))
-            }
         }
         updateTextLabel()
         updateSearchAnchor()
@@ -105,13 +94,7 @@ class AttributeFunctionComponent(override var identifier: Identifier, private va
 
         child(ConfigDockComponent(
             ConfigDockComponent.ConfigDefaultProperties({ _, _ ->
-                val defaultEntry = DataAttributesAPI.serverManager.defaults.functions.entries[parentId]?.get(identifier)
-                if (defaultEntry != null) {
-                    toggleButton.enabled(defaultEntry.enabled)
-                    valueEntry.textbox.text = defaultEntry.value.toString()
-                    updateStackingBehavior(defaultEntry.behavior)
-                }
-                else remove()
+                remove()
 
                 backing[parentId]?.remove(identifier) != null
 

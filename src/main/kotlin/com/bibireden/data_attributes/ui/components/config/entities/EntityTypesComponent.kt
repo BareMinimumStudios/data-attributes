@@ -1,31 +1,24 @@
 package com.bibireden.data_attributes.ui.components.config.entities
 
 import com.bibireden.data_attributes.DataAttributesClient
-import com.bibireden.data_attributes.api.DataAttributesAPI
 import com.bibireden.data_attributes.config.DataAttributesConfigProviders.registryEntryToText
 import com.bibireden.data_attributes.config.DataAttributesConfigProviders.textBoxComponent
 import com.bibireden.data_attributes.config.Validators
 import com.bibireden.data_attributes.config.entities.EntityTypeData
 import com.bibireden.data_attributes.config.entities.EntityTypeEntry
 import com.bibireden.data_attributes.ext.round
-import com.bibireden.data_attributes.ui.components.buttons.ButtonComponents
 import com.bibireden.data_attributes.ui.components.config.AttributeConfigComponent
 import com.bibireden.data_attributes.ui.components.config.ConfigDockComponent
 import com.bibireden.data_attributes.ui.components.entries.DataEntryComponent
 import com.bibireden.data_attributes.ui.components.entries.EntryComponents
 import com.bibireden.data_attributes.ui.components.fields.FieldComponents
-import com.bibireden.data_attributes.ui.config.providers.EntityTypesProviderV2
-import com.bibireden.data_attributes.ui.renderers.ButtonRenderers
+import com.bibireden.data_attributes.ui.config.providers.EntityTypesProvider
 import io.wispforest.owo.config.Option
 import io.wispforest.owo.config.ui.component.SearchAnchorComponent
-import io.wispforest.owo.ui.component.Components
 import io.wispforest.owo.ui.component.LabelComponent
-import io.wispforest.owo.ui.component.TextBoxComponent
 import io.wispforest.owo.ui.container.CollapsibleContainer
-import io.wispforest.owo.ui.container.Containers
 import io.wispforest.owo.ui.container.FlowLayout
 import io.wispforest.owo.ui.core.Sizing
-import io.wispforest.owo.ui.core.VerticalAlignment
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.attribute.ClampedEntityAttribute
@@ -36,13 +29,10 @@ import net.minecraft.registry.Registry
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 
-class EntityTypesComponent(override var identifier: Identifier, private var parentId: Identifier, private var entry: EntityTypeEntry, private val provider: EntityTypesProviderV2)
+class EntityTypesComponent(override var identifier: Identifier, private var parentId: Identifier, private var entry: EntityTypeEntry, private val provider: EntityTypesProvider)
     : CollapsibleContainer(Sizing.content(), Sizing.content(), Text.of("<n/a>"), DataAttributesClient.UI_STATE.collapsible.entityTypeEntries[parentId.toString()]?.get(identifier.toString()) ?: true), AttributeConfigComponent<EntityAttribute> {
 
     override val registry: Registry<EntityAttribute> = Registries.ATTRIBUTE
-
-    override val isDefault: Boolean
-        get() = provider.backing[parentId]?.data?.get(identifier) == null
 
     private fun updateSearchAnchor() {
         childById(SearchAnchorComponent::class.java, "search-anchor")?.remove()
@@ -50,14 +40,14 @@ class EntityTypesComponent(override var identifier: Identifier, private var pare
     }
 
     private fun updateTextLabel() {
-        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, registry, { it.translationKey }, isDefault))
+        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, registry, { it.translationKey }, false))
     }
 
     override fun update() {
         titleLayout().tooltip(null)
+
         when {
             !isRegistered -> titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.invalid"))
-            isDefault -> titleLayout().tooltip(Text.translatable("text.config.data_attributes_data_entry.default"))
         }
 
         // find fallback
@@ -106,11 +96,7 @@ class EntityTypesComponent(override var identifier: Identifier, private var pare
         child(ConfigDockComponent(ConfigDockComponent.ConfigDefaultProperties({ _, _ ->
             val entry = provider.backing[parentId]?.data?.toMutableMap() ?: return@ConfigDefaultProperties
             if (entry.remove(identifier) != null) {
-                val defaultEntry = DataAttributesAPI.serverManager.defaults.types.entries[parentId]?.get(identifier)
-                if (defaultEntry != null) {
-                    valueEntry.textbox.text = defaultEntry.value.toString()
-                }
-                else remove()
+                remove()
 
                 provider.backing[parentId] = EntityTypeData(entry)
 

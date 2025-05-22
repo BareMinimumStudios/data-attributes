@@ -4,7 +4,6 @@ import com.bibireden.data_attributes.ui.colors.ColorCodes
 import com.bibireden.data_attributes.ui.config.providers.AttributeFunctionProvider
 import com.bibireden.data_attributes.ui.config.providers.AttributeOverrideProvider
 import com.bibireden.data_attributes.ui.config.providers.EntityTypesProvider
-import com.bibireden.data_attributes.ui.config.providers.EntityTypesProviderV2
 import com.google.common.base.Predicate
 import io.wispforest.owo.config.ui.OptionComponentFactory
 import io.wispforest.owo.ui.component.Components
@@ -23,7 +22,7 @@ object DataAttributesConfigProviders {
         val text = Text.empty()
         if (entry != null) {
             text.append(Text.translatable(representation(entry)).append(" "))
-                .setStyle(Style.EMPTY.withColor(if (isDefault) 0x84de56 else 0xE7C14B))
+                .setStyle(Style.EMPTY.withColor(0xE7C14B))
         }
         text.append(Text.literal("($id)").also { t ->
             t.setStyle(
@@ -44,7 +43,7 @@ object DataAttributesConfigProviders {
     }
 
     val ENTITY_TYPES_FACTORY = OptionComponentFactory { _, option ->
-        return@OptionComponentFactory EntityTypesProviderV2(option).let { OptionComponentFactory.Result(it, it) }
+        return@OptionComponentFactory EntityTypesProvider(option).let { OptionComponentFactory.Result(it, it) }
     }
 
     fun textBoxComponent(txt: Text, obj: Any, predicate: Predicate<String>? = null, onChange: ((String) -> Unit)? = null, textBoxID: String? = null): FlowLayout {

@@ -10,6 +10,7 @@ import com.bibireden.data_attributes.config.functions.AttributeFunction
 import com.bibireden.data_attributes.config.models.OverridesConfigModel.AttributeOverride
 import com.bibireden.data_attributes.data.EntityAttributeData
 import com.bibireden.data_attributes.config.entities.EntityTypeData
+import com.bibireden.data_attributes.config.entry.DatapackCaches
 import com.bibireden.data_attributes.endec.Endecs
 import com.bibireden.data_attributes.ext.keyOf
 import com.bibireden.data_attributes.mutable.MutableEntityAttribute
@@ -33,7 +34,7 @@ import net.minecraft.util.Identifier
 class AttributeConfigManager(var data: Data = Data(), private val handler: AttributeContainerHandler = AttributeContainerHandler()) {
     var updateFlag: Int = 0
 
-    var defaults: DefaultAttributesReloadListener.Cache = DefaultAttributesReloadListener.Cache()
+    var defaults: DatapackCaches = LinkedHashMap()
 
     @JvmRecord
     data class Tuple<T>(val livingEntity: Class<out LivingEntity>, val value: T)
@@ -111,9 +112,11 @@ class AttributeConfigManager(var data: Data = Data(), private val handler: Attri
      * This applies the data immediately afterward.
      */
     fun update() {
-        this.data.overrides = ConfigMerger.mergeOverrides(defaults.overrides.entries)
-        this.data.functions = ConfigMerger.mergeFunctions(defaults.functions.entries)
-        this.data.entity_types = ConfigMerger.mergeEntityTypes(defaults.types.entries)
+        for (cache in defaults.values) {
+            this.data.overrides = ConfigMerger.mergeOverrides(cache.overrides.entries)
+            this.data.functions = ConfigMerger.mergeFunctions(cache.functions.entries)
+            this.data.entity_types = ConfigMerger.mergeEntityTypes(cache.types.entries)
+        }
 
         this.onDataUpdate()
     }

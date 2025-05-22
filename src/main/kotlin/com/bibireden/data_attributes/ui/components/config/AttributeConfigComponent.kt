@@ -9,9 +9,6 @@ interface AttributeConfigComponent<T> {
     val registry: Registry<T>
     val registryEntry: T? get() = registry[identifier]
 
-    /** If this [Identifier] currently exists in the backing field. */
-    val isDefault: Boolean
-
     /** If the given entry is currently registered. */
     val isRegistered: Boolean
         get() = registryEntry != null

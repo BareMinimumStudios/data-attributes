@@ -32,15 +32,6 @@ class AttributeFunctionProvider(val option: Option<AttributeFunctionConfig>) : F
         for ((id, entry) in backing) {
             child(AttributeFunctionHeaderComponent(id, entry, this).id(id.toString()))
         }
-        for ((id, entry) in DataAttributesAPI.serverManager.defaults.functions.entries) {
-            val component = childById(AttributeFunctionHeaderComponent::class.java, id.toString())
-            if (component != null) {
-                component.addFunctions(entry)
-            }
-            else {
-                child(AttributeFunctionHeaderComponent(id, entry, this).id(id.toString()))
-            }
-        }
     }
 
     override fun isValid() = !this.option.detached()

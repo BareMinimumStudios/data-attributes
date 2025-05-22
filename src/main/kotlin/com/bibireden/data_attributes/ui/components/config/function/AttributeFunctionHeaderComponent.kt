@@ -29,9 +29,6 @@ class AttributeFunctionHeaderComponent(override var identifier: Identifier, priv
     override val registry: Registry<EntityAttribute>
         get() = Registries.ATTRIBUTE
 
-    override val isDefault: Boolean
-        get() = !provider.backing.containsKey(identifier)
-
     private fun createEntry(childId: Identifier, function: AttributeFunction): AttributeFunctionComponent = childById(AttributeFunctionComponent::class.java, "child#$childId") ?: AttributeFunctionComponent(childId, function, identifier, provider).also { it.id("child#$childId") }.also(::child)
 
     private fun updateSearchAnchor() {
@@ -40,7 +37,7 @@ class AttributeFunctionHeaderComponent(override var identifier: Identifier, priv
     }
 
     private fun updateTextLabel() {
-        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, isDefault))
+        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, false))
     }
 
     override fun update() {
@@ -48,9 +45,6 @@ class AttributeFunctionHeaderComponent(override var identifier: Identifier, priv
         when {
             !isRegistered -> {
                 titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.invalid"))
-            }
-            isDefault -> {
-                titleLayout().tooltip(Text.translatable("text.config.data_attributes_data_entry.default"))
             }
         }
         updateTextLabel()
@@ -69,16 +63,7 @@ class AttributeFunctionHeaderComponent(override var identifier: Identifier, priv
         child(
             ConfigDockComponent(ConfigDockComponent.ConfigDefaultProperties({ _, _ ->
                 provider.backing.remove(identifier)
-
-                val entries = DataAttributesAPI.serverManager.defaults.functions.entries[identifier]
-
-                if (entries != null) {
-                    forEachDescendant {
-                        if (it is AttributeFunctionComponent) { if (entries.containsKey(it.identifier)) it.update() else it.remove() }
-                    }
-                    update()
-                }
-                else remove()
+                remove()
             })
             { _, _ ->
                 if (childById(FlowLayout::class.java, "edit-field") == null) {

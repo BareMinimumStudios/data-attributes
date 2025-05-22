@@ -1,40 +1,31 @@
 package com.bibireden.data_attributes.ui.components.config.entities
 
 import com.bibireden.data_attributes.DataAttributesClient
-import com.bibireden.data_attributes.api.DataAttributesAPI
 import com.bibireden.data_attributes.config.DataAttributesConfigProviders.registryEntryToText
 import com.bibireden.data_attributes.config.entities.EntityTypeData
 import com.bibireden.data_attributes.config.entities.EntityTypeEntry
 import com.bibireden.data_attributes.ui.components.CollapsibleFoldableContainer
-import com.bibireden.data_attributes.ui.components.buttons.ButtonComponents
 import com.bibireden.data_attributes.ui.components.config.AttributeConfigComponent
 import com.bibireden.data_attributes.ui.components.config.ConfigDockComponent
-import com.bibireden.data_attributes.ui.components.config.function.AttributeFunctionComponent
 import com.bibireden.data_attributes.ui.components.fields.FieldComponents
-import com.bibireden.data_attributes.ui.config.providers.EntityTypesProviderV2
+import com.bibireden.data_attributes.ui.config.providers.EntityTypesProvider
 import com.bibireden.data_attributes.ui.renderers.ButtonRenderers
 import io.wispforest.owo.config.Option
 import io.wispforest.owo.config.ui.component.SearchAnchorComponent
 import io.wispforest.owo.ui.component.Components
 import io.wispforest.owo.ui.component.LabelComponent
-import io.wispforest.owo.ui.container.Containers
 import io.wispforest.owo.ui.container.FlowLayout
 import io.wispforest.owo.ui.core.Sizing
-import io.wispforest.owo.ui.core.VerticalAlignment
 import net.minecraft.entity.EntityType
-import net.minecraft.entity.attribute.EntityAttribute
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 
-class EntityTypesHeaderComponent(override var identifier: Identifier, private val entityTypes: MutableMap<Identifier, EntityTypeEntry>, private val provider: EntityTypesProviderV2)
+class EntityTypesHeaderComponent(override var identifier: Identifier, private val entityTypes: MutableMap<Identifier, EntityTypeEntry>, private val provider: EntityTypesProvider)
     : CollapsibleFoldableContainer(Sizing.content(), Sizing.content(), Text.of("<n/a>"), DataAttributesClient.UI_STATE.collapsible.entityTypeHeaders[identifier.toString()] ?: true), AttributeConfigComponent<EntityType<*>> {
 
     override val registry: Registry<EntityType<*>> = Registries.ENTITY_TYPE
-
-    override val isDefault: Boolean
-        get() = !provider.backing.containsKey(identifier)
 
     private fun updateSearchAnchor() {
         childById(SearchAnchorComponent::class.java, "search-anchor")?.remove()
@@ -42,7 +33,7 @@ class EntityTypesHeaderComponent(override var identifier: Identifier, private va
     }
 
     private fun updateTextLabel() {
-        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, registry, { it.translationKey }, isDefault))
+        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, registry, { it.translationKey }, false))
     }
 
     private fun createEntry(entryId: Identifier, entry: EntityTypeEntry): EntityTypesComponent = childById(EntityTypesComponent::class.java, "entry#$entryId") ?: EntityTypesComponent(entryId, identifier, entry, provider).also { it.id("entry#$entryId")}.also(::child)
@@ -52,9 +43,6 @@ class EntityTypesHeaderComponent(override var identifier: Identifier, private va
         when {
             !isRegistered -> {
                 titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.invalid"))
-            }
-            isDefault -> {
-                titleLayout().tooltip(Text.translatable("text.config.data_attributes_data_entry.default"))
             }
         }
         updateTextLabel()
@@ -71,14 +59,7 @@ class EntityTypesHeaderComponent(override var identifier: Identifier, private va
         child(
             ConfigDockComponent(ConfigDockComponent.ConfigDefaultProperties({ _, _ ->
                 provider.backing.remove(identifier)
-
-                val entries = DataAttributesAPI.serverManager.defaults.types.entries[identifier]
-
-                if (entries != null) {
-                    forEachDescendant { if (it is EntityTypesComponent) { if (entries.containsKey(it.identifier)) it.update() else it.remove() } }
-                    update()
-                }
-                else remove()
+                remove()
             })
             { _, _ ->
                 if (childById(FlowLayout::class.java, "edit-field") == null) {

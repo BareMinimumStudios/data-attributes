@@ -2,7 +2,6 @@ package com.bibireden.data_attributes.serde
 
 import blue.endless.jankson.Jankson
 import blue.endless.jankson.JsonObject
-import blue.endless.jankson.JsonPrimitive
 import com.bibireden.data_attributes.config.functions.AttributeFunction
 import com.bibireden.data_attributes.config.functions.AttributeFunctionConfig
 import com.bibireden.data_attributes.config.entities.EntityTypeData

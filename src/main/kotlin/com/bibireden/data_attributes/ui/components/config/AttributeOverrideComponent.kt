@@ -40,8 +40,6 @@ class AttributeOverrideComponent(
 
     private fun isRegistered() = attribute != null
 
-    private fun isDefault() = !backing.containsKey(identifier)
-
     private val dataEntryMin: DataEntryComponent<Double>?
     private val dataEntryMax: DataEntryComponent<Double>?
     private val dataEntryMinFallback: DataEntryComponent<Double>?
@@ -71,7 +69,7 @@ class AttributeOverrideComponent(
             dataEntryMaxFallback?.textbox?.setPlaceholder(Text.of(override.max_fallback.toString()))
         }
 
-        this.titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, isDefault()))
+        this.titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, false))
 
         titleLayout().tooltip(null)
 
@@ -79,21 +77,11 @@ class AttributeOverrideComponent(
             !isRegistered() -> {
                 titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.invalid"))
             }
-            isDefault() -> {
-                titleLayout().tooltip(Text.translatable("text.config.data_attributes_data_entry.default"))
-            }
         }
     }
 
     private fun changeAttributeOverride(changed: AttributeOverride) {
-        val wasDefault = isDefault()
         replaceEntry(identifier, changed)
-        if (wasDefault) {
-            val index = provider.children().indexOf(this)
-            this.provider.child(index, AttributeOverrideComponent(identifier, changed, backing, provider))
-            this.remove()
-            update()
-        }
     }
 
     init {
@@ -111,55 +99,47 @@ class AttributeOverrideComponent(
                 button.renderer(ButtonRenderers.STANDARD)
             })
 
-            if (!isDefault()) {
-                content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.reset"))
-                {
-                   changeAttributeOverride(override.copy(
-                       min = attribute?.`data_attributes$min_fallback`() ?: override.min_fallback,
-                       max = attribute?.`data_attributes$max_fallback`() ?: override.max_fallback,
-                       smoothness = 1.0,
-                       formula = StackingFormula.Flat,
-                       format = AttributeFormat.Whole
-                   ))
-                }
-                    .renderer(ButtonRenderers.STANDARD)
-                )
-
-                content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.edit")) {
-                    if (this.childById(EditFieldComponent::class.java, "edit-field") != null) return@button
-
-                    val field = FieldComponents.identifier(
-                        { newId, _ ->
-                            if (newId in backing || !Registries.ATTRIBUTE.containsId(newId)) return@identifier
-
-                            this.backing.remove(identifier)
-                            replaceEntry(newId, override)
-                            update()
-                        },
-                        autocomplete = Registries.ATTRIBUTE.ids
-                    ).apply { id("edit-field") }
-
-                    field.textBox.predicate = { id -> id !in backing && Registries.ATTRIBUTE.containsId(id) }
-
-                    this.child(0, field)
-                }
-                    .renderer(ButtonRenderers.STANDARD)
-                )
-
-                content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.remove")) {
-                    this.backing.remove(identifier)
-
-                    val default = DataAttributesAPI.serverManager.defaults.overrides.entries[identifier]
-                    if (default != null) {
-                        val index = provider.children().indexOf(this)
-                        this.provider.child(index, AttributeOverrideComponent(identifier, default, backing, provider))
-                    }
-
-                    remove()
-                }
-                    .renderer(ButtonRenderers.STANDARD)
-                )
+            content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.reset"))
+            {
+                changeAttributeOverride(override.copy(
+                    min = attribute?.`data_attributes$min_fallback`() ?: override.min_fallback,
+                    max = attribute?.`data_attributes$max_fallback`() ?: override.max_fallback,
+                    smoothness = 1.0,
+                    formula = StackingFormula.Flat,
+                    format = AttributeFormat.Whole
+                ))
             }
+                .renderer(ButtonRenderers.STANDARD)
+            )
+
+            content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.edit")) {
+                if (this.childById(EditFieldComponent::class.java, "edit-field") != null) return@button
+
+                val field = FieldComponents.identifier(
+                    { newId, _ ->
+                        if (newId in backing || !Registries.ATTRIBUTE.containsId(newId)) return@identifier
+
+                        this.backing.remove(identifier)
+                        replaceEntry(newId, override)
+                        update()
+                    },
+                    autocomplete = Registries.ATTRIBUTE.ids
+                ).apply { id("edit-field") }
+
+                field.textBox.predicate = { id -> id !in backing && Registries.ATTRIBUTE.containsId(id) }
+
+                this.child(0, field)
+            }
+                .renderer(ButtonRenderers.STANDARD)
+            )
+
+            content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.remove")) {
+                this.backing.remove(identifier)
+
+                remove()
+            }
+                .renderer(ButtonRenderers.STANDARD)
+            )
         })
 
         dataEntryMin = EntryComponents.double(Text.translatable("$stub.min"), DataEntryComponent.Properties({ changeAttributeOverride(override.copy(min = it)) }), override.min.toString())
