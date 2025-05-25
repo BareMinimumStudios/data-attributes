@@ -17,12 +17,12 @@ import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 
 object DataAttributesConfigProviders {
-    fun <T> registryEntryToText(id: Identifier, registry: Registry<T>, representation: (T) -> String, isDefault: Boolean = false): MutableText {
+    fun <T> registryEntryToText(id: Identifier, registry: Registry<T>, representation: (T) -> String, isReadonly: Boolean = false): MutableText {
         val entry = registry[id]
         val text = Text.empty()
         if (entry != null) {
             text.append(Text.translatable(representation(entry)).append(" "))
-                .setStyle(Style.EMPTY.withColor(0xE7C14B))
+                .setStyle(Style.EMPTY.withColor(if (isReadonly) 0x65bde3 else 0xE7C14B))
         }
         text.append(Text.literal("($id)").also { t ->
             t.setStyle(

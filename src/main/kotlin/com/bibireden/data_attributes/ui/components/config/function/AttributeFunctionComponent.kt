@@ -11,6 +11,7 @@ import com.bibireden.data_attributes.ui.components.entries.DataEntryComponent
 import com.bibireden.data_attributes.ui.components.entries.EntryComponents
 import com.bibireden.data_attributes.ui.components.fields.FieldComponents
 import com.bibireden.data_attributes.ui.config.providers.AttributeFunctionProvider
+import com.bibireden.data_attributes.ui.options.UIAttributeComponentOptions
 import com.bibireden.data_attributes.ui.renderers.ButtonRenderers
 import io.wispforest.owo.config.Option
 import io.wispforest.owo.config.ui.component.ConfigToggleButton
@@ -29,7 +30,7 @@ import net.minecraft.registry.Registry
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 
-class AttributeFunctionComponent(override var identifier: Identifier, private var function: AttributeFunction, private var parentId: Identifier, private val provider: AttributeFunctionProvider)
+class AttributeFunctionComponent(override var identifier: Identifier, private var function: AttributeFunction, private var parentId: Identifier, private val provider: AttributeFunctionProvider, private val options: UIAttributeComponentOptions)
     : CollapsibleContainer(Sizing.content(), Sizing.content(), Text.of("<n/a>"), DataAttributesClient.UI_STATE.collapsible.functionChildren[parentId.toString()]?.get(identifier.toString()) ?: true),
     AttributeConfigComponent<MutableEntityAttribute>
 {
@@ -49,7 +50,7 @@ class AttributeFunctionComponent(override var identifier: Identifier, private va
     }
 
     private fun updateTextLabel() {
-        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, false))
+        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, options.isReadonly))
     }
 
     private val toggleButton = ConfigToggleButton().enabled(function.enabled).also {
@@ -92,41 +93,43 @@ class AttributeFunctionComponent(override var identifier: Identifier, private va
     init {
         onToggled().subscribe { DataAttributesClient.UI_STATE.collapsible.functionChildren.computeIfAbsent(parentId.toString()) { mutableMapOf() }[identifier.toString()] = it }
 
-        child(ConfigDockComponent(
-            ConfigDockComponent.ConfigDefaultProperties({ _, _ ->
-                remove()
+        if (!options.isReadonly) {
+            child(ConfigDockComponent(
+                ConfigDockComponent.ConfigDefaultProperties({ _, _ ->
+                    remove()
 
-                backing[parentId]?.remove(identifier) != null
+                    backing[parentId]?.remove(identifier) != null
 
-                update()
-            })
-            { dc, _ ->
-                if (dc.childById(FlowLayout::class.java, "edit-field") == null && backing[parentId]?.get(identifier) != null) {
-                    val field = FieldComponents.identifier(
-                        { newId, _ ->
-                            val entry = backing.computeIfAbsent(parentId) { mutableMapOf() }
-                            if (!registry.containsId(newId) || entry[newId] != null) return@identifier
+                    update()
+                })
+                { dc, _ ->
+                    if (dc.childById(FlowLayout::class.java, "edit-field") == null && backing[parentId]?.get(identifier) != null) {
+                        val field = FieldComponents.identifier(
+                            { newId, _ ->
+                                val entry = backing.computeIfAbsent(parentId) { mutableMapOf() }
+                                if (!registry.containsId(newId) || entry[newId] != null) return@identifier
 
-                            entry[newId] = entry.remove(identifier) ?: return@identifier
-                            backing[parentId] = entry
+                                entry[newId] = entry.remove(identifier) ?: return@identifier
+                                backing[parentId] = entry
 
-                            identifier = newId
+                                identifier = newId
 
-                            for (fc in children().filterIsInstance<AttributeFunctionComponent>()) { fc.updateParent(identifier) }
+                                for (fc in children().filterIsInstance<AttributeFunctionComponent>()) { fc.updateParent(identifier) }
 
-                            update()
-                        },
-                        autocomplete = Registries.ATTRIBUTE.ids
-                    )
+                                update()
+                            },
+                            autocomplete = Registries.ATTRIBUTE.ids
+                        )
 
-                    field.textBox.predicate = { backing[parentId]?.get(it) == null && Registries.ATTRIBUTE.containsId(it) }
+                        field.textBox.predicate = { backing[parentId]?.get(it) == null && Registries.ATTRIBUTE.containsId(it) }
 
-                    child(0, field)
+                        child(0, field)
+                    }
                 }
-            }
-        ).apply {
-            child(0, toggleButton)
-        })
+            ).apply {
+                child(0, toggleButton)
+            })
+        }
 
        valueEntry.also(::child)
 

@@ -5,10 +5,7 @@ import com.bibireden.data_attributes.ui.colors.ColorCodes
 import com.bibireden.data_attributes.ui.components.boxes.ParsedTextBoxComponent
 import io.wispforest.owo.ui.component.Components
 import io.wispforest.owo.ui.container.FlowLayout
-import io.wispforest.owo.ui.core.CursorStyle
-import io.wispforest.owo.ui.core.Positioning
-import io.wispforest.owo.ui.core.Sizing
-import io.wispforest.owo.ui.core.VerticalAlignment
+import io.wispforest.owo.ui.core.*
 import net.minecraft.text.Text
 import java.util.function.Consumer
 
@@ -51,7 +48,7 @@ class DataEntryComponent<V>(label: Text, val parser: Parser<String, V>, properti
         verticalAlignment(VerticalAlignment.CENTER)
         gap(6)
 
-        child(Components.label(label).sizing(Sizing.content(), Sizing.fixed(20)))
+        child(Components.label(label).verticalTextAlignment(VerticalAlignment.CENTER).sizing(Sizing.content(), Sizing.content()))
 
         child(textbox)
         

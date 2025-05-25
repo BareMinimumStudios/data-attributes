@@ -13,6 +13,7 @@ import com.bibireden.data_attributes.ui.components.entries.DataEntryComponent
 import com.bibireden.data_attributes.ui.components.entries.EntryComponents
 import com.bibireden.data_attributes.ui.components.fields.FieldComponents
 import com.bibireden.data_attributes.ui.config.providers.EntityTypesProvider
+import com.bibireden.data_attributes.ui.options.UIAttributeComponentOptions
 import io.wispforest.owo.config.Option
 import io.wispforest.owo.config.ui.component.SearchAnchorComponent
 import io.wispforest.owo.ui.component.LabelComponent
@@ -29,7 +30,7 @@ import net.minecraft.registry.Registry
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 
-class EntityTypesComponent(override var identifier: Identifier, private var parentId: Identifier, private var entry: EntityTypeEntry, private val provider: EntityTypesProvider)
+class EntityTypesComponent(override var identifier: Identifier, private var parentId: Identifier, private var entry: EntityTypeEntry, private val provider: EntityTypesProvider, private val options: UIAttributeComponentOptions)
     : CollapsibleContainer(Sizing.content(), Sizing.content(), Text.of("<n/a>"), DataAttributesClient.UI_STATE.collapsible.entityTypeEntries[parentId.toString()]?.get(identifier.toString()) ?: true), AttributeConfigComponent<EntityAttribute> {
 
     override val registry: Registry<EntityAttribute> = Registries.ATTRIBUTE
@@ -40,7 +41,7 @@ class EntityTypesComponent(override var identifier: Identifier, private var pare
     }
 
     private fun updateTextLabel() {
-        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, registry, { it.translationKey }, false))
+        titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, registry, { it.translationKey }, options.isReadonly))
     }
 
     override fun update() {
@@ -48,6 +49,9 @@ class EntityTypesComponent(override var identifier: Identifier, private var pare
 
         when {
             !isRegistered -> titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.invalid"))
+            options.isReadonly -> {
+                titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.readonly"))
+            }
         }
 
         // find fallback

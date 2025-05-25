@@ -4,6 +4,7 @@ import com.bibireden.data_attributes.DataAttributes
 import io.wispforest.owo.config.Option.SyncMode
 import io.wispforest.owo.config.annotation.Config
 import io.wispforest.owo.config.annotation.Sync
+import net.minecraft.util.Identifier
 
 @Suppress("UNUSED")
 @Config(name = DataAttributes.MOD_ID, wrapperName = "DataAttributesConfig")

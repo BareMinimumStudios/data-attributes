@@ -1,7 +1,6 @@
 package com.bibireden.data_attributes.ui.components.config
 
 import com.bibireden.data_attributes.DataAttributesClient
-import com.bibireden.data_attributes.api.DataAttributesAPI
 import com.bibireden.data_attributes.api.attribute.AttributeFormat
 import com.bibireden.data_attributes.api.attribute.StackingFormula
 import com.bibireden.data_attributes.config.DataAttributesConfigProviders.registryEntryToText
@@ -12,7 +11,6 @@ import com.bibireden.data_attributes.ui.components.entries.DataEntryComponent
 import com.bibireden.data_attributes.ui.components.entries.EntryComponents
 import com.bibireden.data_attributes.ui.components.fields.EditFieldComponent
 import com.bibireden.data_attributes.ui.components.fields.FieldComponents
-import com.bibireden.data_attributes.ui.config.providers.AttributeOverrideProvider
 import com.bibireden.data_attributes.ui.renderers.ButtonRenderers
 import io.wispforest.owo.config.Option
 import io.wispforest.owo.config.ui.component.ConfigToggleButton
@@ -21,6 +19,7 @@ import io.wispforest.owo.ui.component.Components
 import io.wispforest.owo.ui.component.LabelComponent
 import io.wispforest.owo.ui.container.CollapsibleContainer
 import io.wispforest.owo.ui.container.Containers
+import io.wispforest.owo.ui.container.FlowLayout
 import io.wispforest.owo.ui.core.Positioning
 import io.wispforest.owo.ui.core.Sizing
 import io.wispforest.owo.ui.core.VerticalAlignment
@@ -33,8 +32,10 @@ class AttributeOverrideComponent(
     var identifier: Identifier,
     private var override: AttributeOverride,
     private val backing: MutableMap<Identifier, AttributeOverride>,
-    private val provider: AttributeOverrideProvider
+    private val options: Options
 ) : CollapsibleContainer(Sizing.content(), Sizing.content(), Text.of("<n/a>"), DataAttributesClient.UI_STATE.collapsible.overrides[identifier.toString()] ?: true) {
+    data class Options(val isReadonly: Boolean)
+
     private val attribute: MutableEntityAttribute?
         get() = Registries.ATTRIBUTE[identifier]
 
@@ -47,6 +48,11 @@ class AttributeOverrideComponent(
 
     private fun replaceEntry(id: Identifier, override: AttributeOverride) {
         identifier = id
+
+        if (!this.backing.containsKey(id)) {
+            (parent as FlowLayout).child(1, AttributeOverrideComponent(id, override, backing, Options(isReadonly = false)))
+        }
+
         this.backing[id] = override
     }
 
@@ -69,13 +75,16 @@ class AttributeOverrideComponent(
             dataEntryMaxFallback?.textbox?.setPlaceholder(Text.of(override.max_fallback.toString()))
         }
 
-        this.titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, false))
+        this.titleLayout().children().filterIsInstance<LabelComponent>().first().text(registryEntryToText(identifier, Registries.ATTRIBUTE, { it.translationKey }, options.isReadonly))
 
         titleLayout().tooltip(null)
 
         when {
             !isRegistered() -> {
                 titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.invalid"))
+            }
+            options.isReadonly -> {
+                titleLayout().tooltip(Text.translatable("text.config.data_attributes.data_entry.readonly"))
             }
         }
     }
@@ -89,58 +98,61 @@ class AttributeOverrideComponent(
 
         update()
 
-        child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(15)).also { content ->
-            content.verticalAlignment(VerticalAlignment.BOTTOM)
-            content.gap(10)
+        if (!options.isReadonly) {
+            child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(15)).also { content ->
+                content.verticalAlignment(VerticalAlignment.BOTTOM)
 
-            content.child(ConfigToggleButton().also { button ->
-                button.enabled(override.enabled)
-                button.onPress { changeAttributeOverride(override.copy(enabled = !override.enabled)) }
-                button.renderer(ButtonRenderers.STANDARD)
+                content.gap(10)
+
+                content.child(ConfigToggleButton().also { button ->
+                    button.enabled(override.enabled)
+                    button.onPress { changeAttributeOverride(override.copy(enabled = !override.enabled)) }
+                    button.renderer(ButtonRenderers.STANDARD)
+                })
+
+                content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.reset"))
+                {
+                    changeAttributeOverride(override.copy(
+                        min = attribute?.`data_attributes$min_fallback`() ?: override.min_fallback,
+                        max = attribute?.`data_attributes$max_fallback`() ?: override.max_fallback,
+                        smoothness = 1.0,
+                        formula = StackingFormula.Flat,
+                        format = AttributeFormat.Whole
+                    ))
+                }
+                    .renderer(ButtonRenderers.STANDARD)
+                )
+
+                content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.edit")) {
+                    if (this.childById(EditFieldComponent::class.java, "edit-field") != null) return@button
+
+                    val field = FieldComponents.identifier(
+                        { newId, _ ->
+                            if (newId in backing || !Registries.ATTRIBUTE.containsId(newId)) return@identifier
+
+                            this.backing.remove(identifier)
+                            replaceEntry(newId, override)
+                            update()
+                        },
+                        autocomplete = Registries.ATTRIBUTE.ids
+                    ).apply { id("edit-field") }
+
+                    field.textBox.predicate = { id -> id !in backing && Registries.ATTRIBUTE.containsId(id) }
+
+                    this.child(0, field)
+                }
+                    .renderer(ButtonRenderers.STANDARD)
+                )
+
+                content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.remove")) {
+                    this.backing.remove(identifier)
+
+                    remove()
+                }
+                    .renderer(ButtonRenderers.STANDARD)
+                )
             })
-
-            content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.reset"))
-            {
-                changeAttributeOverride(override.copy(
-                    min = attribute?.`data_attributes$min_fallback`() ?: override.min_fallback,
-                    max = attribute?.`data_attributes$max_fallback`() ?: override.max_fallback,
-                    smoothness = 1.0,
-                    formula = StackingFormula.Flat,
-                    format = AttributeFormat.Whole
-                ))
-            }
-                .renderer(ButtonRenderers.STANDARD)
-            )
-
-            content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.edit")) {
-                if (this.childById(EditFieldComponent::class.java, "edit-field") != null) return@button
-
-                val field = FieldComponents.identifier(
-                    { newId, _ ->
-                        if (newId in backing || !Registries.ATTRIBUTE.containsId(newId)) return@identifier
-
-                        this.backing.remove(identifier)
-                        replaceEntry(newId, override)
-                        update()
-                    },
-                    autocomplete = Registries.ATTRIBUTE.ids
-                ).apply { id("edit-field") }
-
-                field.textBox.predicate = { id -> id !in backing && Registries.ATTRIBUTE.containsId(id) }
-
-                this.child(0, field)
-            }
-                .renderer(ButtonRenderers.STANDARD)
-            )
-
-            content.child(Components.button(Text.translatable("text.config.data_attributes.data_entry.remove")) {
-                this.backing.remove(identifier)
-
-                remove()
-            }
-                .renderer(ButtonRenderers.STANDARD)
-            )
-        })
+        }
 
         dataEntryMin = EntryComponents.double(Text.translatable("$stub.min"), DataEntryComponent.Properties({ changeAttributeOverride(override.copy(min = it)) }), override.min.toString())
             .also(::child)
@@ -154,10 +166,12 @@ class AttributeOverrideComponent(
             verticalAlignment(VerticalAlignment.CENTER)
             gap(8)
             child(Components.label(Text.translatable("text.config.data_attributes.data_entry.overrides.smoothness"))
-                .sizing(Sizing.content(), Sizing.fixed(20))
+                .verticalTextAlignment(VerticalAlignment.CENTER)
+                .sizing(Sizing.content(), Sizing.fill(100))
+                .positioning(Positioning.relative(0, 50))
             )
             child(AttributeConfigComponents.smoothnessSlider(override) { changeAttributeOverride(override.copy(smoothness = max(it.value().round(2), 0.001))) }
-                .positioning(Positioning.relative(100, 0))
+                .positioning(Positioning.relative(100, 50))
             )
         }.id("smoothness"))
 
@@ -166,6 +180,7 @@ class AttributeOverrideComponent(
             hf.gap(8)
             hf.child(
                 Components.label(Text.translatable("text.config.data_attributes.data_entry.overrides.formula"))
+                    .verticalTextAlignment(VerticalAlignment.CENTER)
                     .sizing(Sizing.content(), Sizing.fixed(20))
             )
             hf.child(
@@ -184,6 +199,7 @@ class AttributeOverrideComponent(
             hf.gap(8)
             hf.child(
                 Components.label(Text.translatable("text.config.data_attributes.data_entry.overrides.format"))
+                    .verticalTextAlignment(VerticalAlignment.CENTER)
                     .sizing(Sizing.content(), Sizing.fixed(20))
             )
             hf.child(

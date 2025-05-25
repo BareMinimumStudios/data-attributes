@@ -144,10 +144,10 @@
     {"text":  "this field when ready, or replace the config entry in the file.", "italic": true, "color": "gray"}
   ],
 
-  "text.config.data_attributes_data_entry.default": [
-    {"text": "✱ ", "color": "#84de56"},
-    {"text": "Default Entry\n\n", "color": "white"},
-    {"text": "This entry is from another mod or datapack, and can be overrided by editing it.", "color": "white"}
+  "text.config.data_attributes.data_entry.readonly": [
+    {"text": "✱ Readonly Entry", "color": "#65bde3"},
+    {"text": "\n\n", "color": "white"},
+    {"text": "This entry is from another mod or datapack, and will be overrided by any config setting above it.", "color": "white"}
   ],
 
   "text.config.data_attributes.buttons.add": [

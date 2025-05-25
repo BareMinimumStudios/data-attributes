@@ -4,6 +4,8 @@ import com.bibireden.data_attributes.api.DataAttributesAPI
 import com.bibireden.data_attributes.config.functions.AttributeFunction
 import com.bibireden.data_attributes.config.functions.AttributeFunctionConfig
 import com.bibireden.data_attributes.ui.components.config.function.AttributeFunctionHeaderComponent
+import com.bibireden.data_attributes.ui.components.labels.LabelComponents
+import com.bibireden.data_attributes.ui.options.UIAttributeComponentOptions
 import com.bibireden.data_attributes.ui.renderers.ButtonRenderers
 import io.wispforest.owo.config.Option
 import io.wispforest.owo.config.ui.component.OptionValueProvider
@@ -22,7 +24,7 @@ class AttributeFunctionProvider(val option: Option<AttributeFunctionConfig>) : F
                 val id = Identifier("unknown")
                 val entry = mutableMapOf<Identifier, AttributeFunction>()
                 backing[id] = entry
-                child(1, AttributeFunctionHeaderComponent(id, entry,this))
+                child(1, AttributeFunctionHeaderComponent(id, entry,this, UIAttributeComponentOptions(isReadonly = false)))
             }
                 .renderer(ButtonRenderers.STANDARD)
                 .horizontalSizing(Sizing.content())
@@ -30,7 +32,15 @@ class AttributeFunctionProvider(val option: Option<AttributeFunctionConfig>) : F
         )
 
         for ((id, entry) in backing) {
-            child(AttributeFunctionHeaderComponent(id, entry, this).id(id.toString()))
+            child(AttributeFunctionHeaderComponent(id, entry, this, UIAttributeComponentOptions(isReadonly = false)).id(id.toString()))
+        }
+
+        DataAttributesAPI.serverManager.defaults.forEach { (rid, cache) ->
+            child(LabelComponents.header(Text.literal("<< ${rid.namespace} >>")))
+
+            cache.functions.entries.forEach { (id, functions) ->
+                child(AttributeFunctionHeaderComponent(id, functions, this, UIAttributeComponentOptions(isReadonly = true)).id(id.toString()))
+            }
         }
     }
 
