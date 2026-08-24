@@ -1,76 +1,154 @@
-import net.fabricmc.loom.api.LoomGradleExtensionAPI
-
 plugins {
-    id("architectury-plugin") version "3.4-SNAPSHOT"
-    id("dev.architectury.loom") version "1.7-SNAPSHOT" apply false
-    java
-    kotlin("jvm") version "2.0.0"
-    kotlin("plugin.serialization") version "2.0.0"
-    idea
-    id("com.google.devtools.ksp") version "2.0.0-1.0.21"
+    `maven-publish`
+    kotlin("jvm") version libs.versions.kotlin
+    alias(libs.plugins.cloche)
 }
 
-val minecraftVersion = project.properties["minecraft_version"] as String
+group = "net.bms.data_attributes"
+version = "3.0.0"
 
-architectury.minecraft = minecraftVersion
+repositories {
+    cloche.librariesMinecraft()
 
-subprojects {
-    apply(plugin = "dev.architectury.loom")
-
-    val loom = project.extensions.getByName<LoomGradleExtensionAPI>("loom")
-
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        maven("https://maven.parchmentmc.org")
-        maven("https://maven.fabricmc.net/")
-        maven("https://maven.neoforged.net/releases/")
-        maven("https://thedarkcolour.github.io/KotlinForForge/")
-	    maven("https://maven.quiltmc.org/repository/release/")
-        maven("https://maven.kosmx.dev/")
-        maven("https://maven.wispforest.io/releases")
-        maven("https://maven.terraformersmc.com")
-        maven("https://api.modrinth.com/maven")
-        maven("https://maven.su5ed.dev/releases")
+    cloche {
+        main()
+        mavenFabric()
+        mavenForge()
+        mavenNeoforgedMeta()
+        mavenNeoforged()
+        mavenParchment()
     }
 
-    @Suppress("UnstableApiUsage")
-    dependencies {
-        "minecraft"("com.mojang:minecraft:$minecraftVersion")
-        loom.silentMojangMappingsLicense()
-        "mappings"(loom.layered {
-            mappings("org.quiltmc:quilt-mappings:${project.properties["quilt_mappings_minecraft_version"]}+build.${project.properties["quilt_mappings_version"]}:intermediary-v2")
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-$minecraftVersion:${project.properties["parchment"]}@zip")
-        })
+    maven("https://api.modrinth.com/maven")
+    maven("https://maven.nucleoid.xyz")
+    maven("https://maven.terraformersmc.com/")
+    maven("https://maven.ladysnake.org/releases")
+    maven("https://maven.wispforest.io/releases")
+    maven("https://maven.shedaniel.me/")
+    maven("https://thedarkcolour.github.io/KotlinForForge/")
+    maven("https://maven.wispforest.io")
+    maven(url = "https://jitpack.io/")
 
-        implementation("com.google.devtools.ksp:symbol-processing-api:${properties["ksp_version"]}")
-        implementation("com.squareup:kotlinpoet-ksp:${properties["kotlinpoet_version"]}")
+    maven {
+        name = "FzzyMaven"
+        url = uri("https://maven.fzzyhmstrs.me/")
+    }
 
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    mavenCentral()
+}
 
-        compileOnly("org.jetbrains:annotations:24.1.0")
+cloche {
+    metadata {
+        modId = "data_attributes"
+        name = "Data Attributes"
+        description = "Allows manipulation of Minecraft Attributes dynamically using a configuration."
+        license = "BML-1.0"
+
+        author {
+            name = "karuzumi"
+            contact = "https://github.com/karuzumi"
+        }
+
+        url = "https://github.com/BareMinimumStudios/DataAttributes"
+        sources = "https://github.com/BareMinimumStudios/DataAttributes"
+        issues = "https://github.com/BareMinimumStudios/DataAttributes/issues"
+
+        icon = "assets/data_attributes/icon.png"
+    }
+
+    common {
+        mixins.from("src/main/data_attributes.mixins.json")
+
+        mappings {
+            official()
+        }
+
+        dependencies {
+            modApi(libs.owo.neo)
+
+            modImplementation(libs.fuzzy.config)
+
+            modImplementation(libs.endec)
+            modImplementation(libs.netty.endec)
+            modImplementation(libs.gson.endec)
+        }
+    }
+
+    minecraftVersion = "1.21.1"
+
+    neoforge {
+        loaderVersion = libs.versions.neoforge.loader
+
+        runs {
+            server()
+            client()
+        }
+
+        dependencies {
+            modImplementation(libs.neoforge.language.kotlin)
+            modImplementation(libs.owo.neo)
+//            include(libs.sentinel.neo)
+        }
+
+        metadata {
+            modLoader = "kotlinforforge"
+            loaderVersion {
+                start = libs.versions.neoforge.language.kotlin.get()
+            }
+            blurLogo = false
+            dependencies {
+                dependency {
+                    modId = "kotlinforforge"
+                    version(libs.versions.neoforge.language.kotlin.get())
+                }
+            }
+        }
+    }
+
+    fabric {
+        loaderVersion = libs.versions.fabric.loader
+
+        includedClient()
+
+        runs {
+            server()
+            client()
+        }
+
+        dependencies {
+            fabricApi(libs.versions.fabric.api)
+
+            modImplementation(libs.fabric.language.kotlin)
+
+            modImplementation(libs.owo.fab)
+            include(libs.sentinel.fab)
+        }
+
+        metadata {
+            dependencies {
+                dependency {
+                    modId = "fabric-api"
+                    version(libs.versions.fabric.api.get())
+                }
+                dependency {
+                    modId = "fabric-language-kotlin"
+                    version(libs.versions.fabric.language.kotlin.get())
+                }
+            }
+
+            entrypoint("main") {
+                adapter = "kotlin"
+                value = "net.bms.data_attributes.DataAttributesFabricEntrypoint"
+            }
+        }
     }
 }
 
-allprojects {
-    apply(plugin = "java")
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
-    apply(plugin = "architectury-plugin")
-    apply(plugin = "maven-publish")
-    apply(plugin = "idea")
-    apply(plugin = "com.google.devtools.ksp")
-
-    version = project.properties["mod_version"] as String
-    group = project.properties["maven_group"] as String
-    base.archivesName.set(project.properties["archives_base_name"] as String)
-
-    tasks.withType<JavaCompile>().configureEach {
-        options.encoding = "UTF-8"
-        options.release.set(21)
+kotlin {
+    compilerOptions {
+        freeCompilerArgs = listOf("-Xmulti-platform", "-Xno-check-actual", "-Xexpect-actual-classes")
     }
-
-    java.withSourcesJar()
 }
-
+dependencies {
+    testImplementation(kotlin("test"))
+}
