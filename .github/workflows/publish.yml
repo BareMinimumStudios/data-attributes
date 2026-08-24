@@ -1,131 +1,95 @@
-name: Publish
-on:
-  push:
-    branches-ignore:
-      - master
-      - "**/dev**"
-      - "**-dev"
-      - "**-dev**"
-      - dev
-    paths-ignore:
-      - ".gitignore"
-      - ".github/ISSUE_TEMPLATE"
+name: publish
+on: [workflow_dispatch]
 
 jobs:
-  publish:
-    env:
-      BRANCH_PREFIX: $(cat gradle.properties | grep mod_version | cut -d'+' -f2)
+  build:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         java: [21]
-    runs-on: ubuntu-latest
+        changelog: [CHANGELOG.md]
+        minecraft_version: [1.21.1]
+        modrinth: [KCGxOJsE]
+        curseforge: [955929]
     steps:
-      - name: check environment variables
-        run: env
-      - name: checkout repository
-        uses: actions/checkout@v3
-      - name: validate gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
-      - name: setup jdk ${{ matrix.java }}
-        uses: actions/setup-java@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
         with:
+          distribution: temurin
           java-version: ${{ matrix.java }}
-          distribution: "microsoft"
-      - name: make gradle wrapper executable
-        run: chmod +x ./gradlew
-      - name: build
-        if: github.ref == 'refs/heads/${{ env.BRANCH_PREFIX }}'
-        run: ./gradlew build
-      - name: capture build artifacts (neoforge)
-        if: |
-          ${{ matrix.java == '21' }}
-          github.ref == 'refs/heads/${{ env.BRANCH_PREFIX }}'
-        uses: actions/upload-artifact@v3
-        with:
-          name: Artifacts (NeoForge)
-          path: neoforge/build/libs/
-      - name: capture build artifacts (fabric)
-        if: |
-          ${{ matrix.java == '21' }}
-          github.ref == 'refs/heads/${{ env.BRANCH_PREFIX }}'
-        uses: actions/upload-artifact@v3
-        with:
-          name: Artifacts (Fabric)
-          path: fabric/build/libs/
-      - name: get mod version
-        if: github.ref == 'refs/heads/${{ env.BRANCH_PREFIX }}'
-        id: mod_version
-        run: |
-          archived_name=$(grep "archives_base_name" gradle.properties | cut -d'=' -f2 | tr -d '\n')
-          mod_version_val=$(grep "mod_version" gradle.properties | cut -d'=' -f2 | tr -d '\n')
-          commitish_val=$(grep "mod_version" gradle.properties | cut -d'=' -f2 | cut -d'-' -f1 | tr -d '\n')
-          echo "archive_name=$archived_name" >> $GITHUB_OUTPUT
-          echo "mod_version=$mod_version_val" >> $GITHUB_OUTPUT
-          echo "commitish=$commitish_val/main" >> $GITHUB_OUTPUT
-      - name: get minecraft version
-        if: github.ref == 'refs/heads/${{ env.BRANCH_PREFIX }}'
-        id: minecraft_version
-        run: |
-          minecraft_version_val=$(grep "mod_version" gradle.properties | cut -d'+' -f2 | cut -d'-' -f1 | tr -d '\n')
-          echo "minecraft_version=$minecraft_version_val" >> $GITHUB_OUTPUT
+          cache: gradle
 
-      - name: deploy fabric! (mc-publish)
-        if: github.ref == 'refs/heads/${{ env.BRANCH_PREFIX }}'
+      - name: gradlew chmod
+        run: chmod +x ./gradlew
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Get mod metadata
+        id: meta
+        run: |
+          version=$(grep "version =" build.gradle.kts | cut -d'=' -f2 | cut -d'"' -f2 | tr -d '\n')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: publish (fabric)
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          name: ${{ steps.mod_version.outputs.mod_version }}
-          files: |
-            fabric/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
-            fabric/build/libs/*-@(dev|sources|javadoc|shadow).jar
-          github-files: |
-            fabric/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
-            fabric/build/libs/*-@(dev|sources|javadoc|shadow).jar
+          changelog-file: ${{ matrix.changelog }}
 
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          modrinth-id: ${{ matrix.modrinth }}
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
-          github-tag: ${{ steps.mod_version.outputs.mod_version }}
+          curseforge-id: ${{ matrix.curseforge }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
           github-token: ${{ secrets.REPOSITORY_TOKEN }}
-          github-commitish: ${{ steps.commitish.outputs.commitish }}
+          github-tag: ${{ steps.meta.outputs.version }}
+          github-commitish: ${{ steps.meta.outputs.version }}
 
-          version: ${{ steps.mod_version.outputs.mod_version }}-fabric
-          changelog-file: CHANGELOG.md
+          files: build/libs/*-fabric-(${{ matrix.minecraft_version }}).jar
+          github-files: |
+            build/libs/intermediates/*-fabric-*dev.jar
+            build/libs/intermediates/*-fabric-*sources.jar
+            build/libs/intermediates/*-fabric-*javadoc.jar
+            build/libs/intermediates/*-fabric-*shadow.jar
 
-          game-versions: "${{ steps.minecraft_version.outputs.minecraft_version }}"
-          java: "${{ matrix.java }}"
+          version: fabric-${{ steps.meta.outputs.version }}
 
-      - name: deploy neoforge! (mc-publish)
-        if: github.ref == 'refs/heads/${{ env.BRANCH_PREFIX }}'
+          game-versions: ${{ matrix.minecraft_version }}
+
+          loaders: |
+            quilt
+            fabric
+
+          java: ${{ matrix.java }}
+
+      - name: publish (neoforge)
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          name: ${{ steps.mod_version.outputs.mod_version }}
+          changelog-file: ${{ matrix.changelog }}
 
-          files: |
-            neoforge/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
-            neoforge/build/libs/*-@(dev|sources|javadoc|shadow).jar
-          github-files: |
-            neoforge/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
-            neoforge/build/libs/*-@(dev|sources|javadoc|shadow).jar
+          modrinth-id: ${{ matrix.modrinth }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
-          modrinth-id: KCGxOJsE
-          curseforge-id: 955929
-
+          curseforge-id: ${{ matrix.curseforge }}
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          modrinth-token: "${{ secrets.MODRINTH_TOKEN }}"
 
-          github-tag: ${{ steps.mod_version.outputs.mod_version }}
           github-token: ${{ secrets.REPOSITORY_TOKEN }}
-          github-commitish: ${{ steps.commitish.outputs.commitish }}
+          github-tag: ${{ steps.meta.outputs.version }}
+          github-commitish: ${{ steps.meta.outputs.version }}
 
-          version: ${{ steps.mod_version.outputs.mod_version }}-neoforge
-          changelog-file: CHANGELOG.md
+          files: build/libs/*-neoforge-(${{ matrix.minecraft_version }}).jar
+          github-files: |
+            build/libs/intermediates/*-neoforge-*dev.jar
+            build/libs/intermediates/*-neoforge-*sources.jar
+            build/libs/intermediates/*-neoforge-*javadoc.jar
+            build/libs/intermediates/*-neoforge-*shadow.jar
+
+          version: neoforge-${{ steps.meta.outputs.version }}
+
+          game-versions: ${{ matrix.minecraft_version }}
 
           loaders: |
             neoforge
 
-          dependencies: |
-            kotlinforforge@4.10.0(required){modrinth:ordsPcFz}{curseforge:351264}#(ignore:github)
-            owo-lib@0.12.15-beta.12+1.21(required){modrinth:ccKDOlHs}{curseforge:532610}#(ignore:github)
-
-          game-versions: "${{ steps.minecraft_version.outputs.minecraft_version }}"
-          java: "${{ matrix.java }}"
+          java: ${{ matrix.java }}
