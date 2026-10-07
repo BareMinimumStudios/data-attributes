@@ -1,67 +1,140 @@
-![Data Attributes Banner](https://cdn.modrinth.com/data/cached_images/464354cc9d34d3778ad4a9db3816adc86c0f6b84.png)
-[![GitHub license](https://img.shields.io/badge/MIT-MIT?style=for-the-badge&label=LICENCE&labelColor=1A1A1A&color=FFFFFF&link=https%3A%2F%2Fgithub.com%2FPlayerEXDirectorsCut%2Fdata-attributes%2Fblob%2F1.20.1%2Fmain%2FLICENSE)](https://github.com/PlayerEXDirectorsCut/data-attributes/blob/1.20.1/main/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/PlayerEXDirectorsCut/data-attributes?style=for-the-badge&logo=github&labelColor=1A1A1A&color=FFFFFF&link=https%3A%2F%2Fgithub.com%2FPlayerEXDirectorsCut%2Fdata-attributes%2Fstargazers
-)](https://github.com/PlayerEXDirectorsCut/data-attributes/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/PlayerEXDirectorsCut/data-attributes?style=for-the-badge&logo=github&labelColor=1A1A1A&color=FFFFFF&link=https%3A%2F%2Fgithub.com%2FPlayerEXDirectorsCut%2Fdata-attributes%2Fforks
-)](https://github.com/PlayerEXDirectorsCut/data-attributes/forks)
-[![GitHub issues](https://img.shields.io/github/issues/PlayerEXDirectorsCut/data-attributes?style=for-the-badge&logo=github&label=ISSUES&labelColor=1A1A1A&link=https%3A%2F%2Fgithub.com%2FPlayerEXDirectorsCut%2Fdata-attributes%2Fissues
-)](https://github.com/PlayerEXDirectorsCut/data-attributes/issues)
+<p align="center">
+  <img src="https://cdn.modrinth.com/data/cached_images/464354cc9d34d3778ad4a9db3816adc86c0f6b84.png" alt="Data Attributes banner" />
+</p>
 
-[![docs](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/generic_vector.svg)](https://playerexdirectorscut.github.io/Bare-Minimum-Docs/)
-![mkdocs](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/built-with/mkdocs_vector.svg)
-![java17](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/built-with/java17_vector.svg)
-[![curseforge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg)](https://www.curseforge.com/minecraft/mc-mods/data-attributes-directors-cut)
-[![modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/mod/data-attributes-directors-cut)
+<p align="center">
+  <a href="LICENSE"><img alt="BML 1.0 License" src="https://img.shields.io/badge/LICENSE-BML%201.0-FFFFFF?style=for-the-badge&labelColor=1A1A1A" /></a>
+  <a href="https://github.com/BareMinimumStudios/data-attributes/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/BareMinimumStudios/data-attributes?style=for-the-badge&logo=github&labelColor=1A1A1A&color=FFFFFF" /></a>
+  <a href="https://github.com/BareMinimumStudios/data-attributes/forks"><img alt="GitHub forks" src="https://img.shields.io/github/forks/BareMinimumStudios/data-attributes?style=for-the-badge&logo=github&labelColor=1A1A1A&color=FFFFFF" /></a>
+  <a href="https://github.com/BareMinimumStudios/data-attributes/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/BareMinimumStudios/data-attributes?style=for-the-badge&logo=github&label=ISSUES&labelColor=1A1A1A&color=FFFFFF" /></a>
+</p>
 
-## Preamble
+<p align="center">
+  <a href="https://bareminimumstudios.github.io/Bare-Minimum-Docs/data-attributes/home/"><img alt="Documentation" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/generic_vector.svg" /></a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/data-attributes-directors-cut"><img alt="Available on CurseForge" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg" /></a>
+  <a href="https://modrinth.com/mod/data-attributes-directors-cut"><img alt="Available on Modrinth" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg" /></a>
+</p>
 
-**Data Attributes: Directors Cut** is a Minecraft mod that has been ported from 1.19.2. **[Original Mod](https://www.curseforge.com/minecraft/mc-mods/data-attributes)**
+<p align="center">
+  <strong>Minecraft 1.21.1 · Fabric + NeoForge · Java 21</strong>
+</p>
 
-It serves two functions:
-- Overhauling Minecraft's Entity Attribute system to be more **dynamic**
-- Allowing attributes to be **exposed to datapack manipulation**, so it's easy for pack developers to customize everything about the attribute system
+# Data Attributes
 
-## Usage
+Data Attributes turns Minecraft's entity attribute system into something pack makers and server owners can actually shape. It can raise or lower an attribute's legal bounds, derive one attribute from another, and assign base values to specific entity types or broader entity groups. Those rules can come from datapacks or from a server-authoritative Fzzy Config setup.
 
-Data Attributes has a [Curseforge](https://www.curseforge.com/minecraft/mc-mods/data-attributes-directors-cut) and [Modrinth](https://modrinth.com/mod/data-attributes-directors-cut) page. For developers, add the following to your `build.gradle`.
+The mod does not add a new progression system or a pile of content on its own. It is the attribute layer underneath those systems: useful by itself for server customization, and useful to other mods that need more flexible attributes.
 
-```gradle
+This project continues the original [Data Attributes](https://modrinth.com/mod/data-attributes) by CleverNucleus. The continuation was previously distributed as **Data Attributes: Directors Cut**; the current source is maintained by Bare Minimum Studios.
+
+## What you can configure
+
+### Attribute Definition Overrides
+
+Definition overrides change what an attribute is *allowed* to do. They can replace its minimum or maximum, select flat or diminished stacking, tune diminishing smoothness, and change Data Attributes' display formatting.
+
+They do **not** set an entity's base value. Raising `minecraft:generic.max_health`'s maximum to `2048` only raises the ceiling; it does not give every entity 2048 health.
+
+### Attribute Functions
+
+Functions let one attribute contribute to another. A parent/source attribute can add to or multiply a child/derived attribute using a configurable coefficient, which makes follow-on stats possible without hard-coding them into every downstream mod.
+
+### Entity Base Attributes
+
+Entity entries are the layer that actually changes an entity's base attribute value. You can target concrete entity IDs or Data Attributes' implicit groups and then layer more specific entries on top.
+
+For example, setting `minecraft:player -> minecraft:generic.max_health = 2` gives players a raw max-health base of 2. Definition bounds still control the legal calculated result, but they remain separate from that base value.
+
+## Configuration and datapacks
+
+The effective configuration is built in a predictable order:
+
+```text
+Vanilla defaults → datapacks → server configuration
+```
+
+The Fzzy Config screen is server-authoritative and includes an informational **Datapack Baseline Preview**, so you can see what loaded datapacks contribute before overriding them. The full field-by-field reference lives in [CONFIGURATION.md](CONFIGURATION.md).
+
+Datapack entries are read from:
+
+```text
+data/<namespace>/data_attributes/overrides/*.json
+data/<namespace>/data_attributes/functions/*.json
+data/<namespace>/data_attributes/entity_types/*.json
+```
+
+Normal datapack priority applies when multiple packs provide the same entry.
+
+## Live changes
+
+You generally do not need to restart the server while tuning attributes. Saving an accepted change through the Fzzy Config GUI rebuilds the effective server configuration immediately, and loaded living entities pick up supplier-owned base changes on their next tick.
+
+Datapack JSON changes use vanilla `/reload`. Editing Fzzy's JSON5 file directly on disk is different: `/reload` is a datapack/resource reload and does not act as a general Fzzy config-file reload.
+
+Runtime base values that were deliberately changed by another system, such as `/attribute ... base set`, are preserved instead of being mistaken for a configured supplier value.
+
+## Requirements
+
+| Loader | Required mods |
+| --- | --- |
+| **Fabric 1.21.1** | Fabric API, Fabric Language Kotlin, Fzzy Config |
+| **NeoForge 1.21.1** | Kotlin for Forge (NeoForge), Fzzy Config |
+
+Data Attributes no longer depends on OWO Lib/OOLib, OWO Sentinel, or Endec.
+
+> [!IMPORTANT]
+> Data Attributes is not intended to be used alongside **AttributeFix**. Both modify the attribute bounds/capabilities layer and can conflict with each other.
+
+## For developers
+
+Data Attributes is available through Modrinth's Maven endpoint. Using the project ID keeps the coordinate stable even if the public project slug changes:
+
+```kotlin
 repositories {
-    maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-        }
-    }
+    maven("https://api.modrinth.com/maven")
 }
 
 dependencies {
-    modImplementation "maven.modrinth:data-attributes-directors-cut:<version>"
+    modImplementation("maven.modrinth:KCGxOJsE:<version>")
 }
 ```
 
-<details><summary>Alternatively, if you are using cursemaven:</summary>
+CurseMaven users can reference CurseForge project `955929`:
 
-```gradle
+```kotlin
 repositories {
-    maven {
-        name = "Cursemaven"
-        url = "https://cursemaven.com"
-    }
+    maven("https://cursemaven.com")
 }
 
 dependencies {
-    modImplementation "curse.maven:data-attributes-directors-cut-955929:<version-file-id>"
+    modImplementation("curse.maven:data-attributes-directors-cut-955929:<file-id>")
 }
 ```
 
-</details>
+The 1.21.1 project is built with **Java 21**, **Kotlin**, and **Cloche**. Shared runtime code deliberately stays loader-neutral; loader-specific Fzzy Config integrations are compiled separately so Fabric mappings cannot leak into the NeoForge/Mojmap side.
 
-Note that Data Attributes: Directors Cut depends on [Fabric API](https://github.com/FabricMC/fabric), so you will need to consider this as well.
+Build both targets with:
 
-It also does not support `Attributefix`, as they have the same capabilities, and are incompatible.
+```bash
+./gradlew build
+```
 
-### • F.A.Q
-- I think that I've found a bug/crash, where can I report it?
-    - Please make an entry to the [Issue Tracker](https://github.com/PlayerEXDirectorsCut/data-attributes/issues).
+## Links
+
+- [Source](https://github.com/BareMinimumStudios/data-attributes)
+- [Issues](https://github.com/BareMinimumStudios/data-attributes/issues)
+- [Configuration reference](CONFIGURATION.md)
+- [Documentation](https://bareminimumstudios.github.io/Bare-Minimum-Docs/data-attributes/home/)
+- [Modrinth](https://modrinth.com/mod/data-attributes-directors-cut)
+- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/data-attributes-directors-cut)
+- [Original Data Attributes](https://modrinth.com/mod/data-attributes)
+
+## Sponsor
+
+[![Sponsor Banner](https://www.bisecthosting.com/partners/custom-banners/db76a74a-a111-4660-98b7-5a75c15a5951.png)](https://bisecthosting.com/bareminimum)
+
+Use code **`bareminimum`** to get **25% off your first month**!
+
+## License
+
+The current Bare Minimum Studios source is licensed under the **Bare Minimum License (BML) v1.0**. See [LICENSE](LICENSE) for the full terms.

@@ -1,27 +1,24 @@
 {
     "required": true,
+    "package": "net.bms.data_attributes.mixin",
+    "compatibilityLevel": "JAVA_21",
     "minVersion": "0.8",
-    "package": "com.bibireden.data_attributes.mixin",
-    "compatibilityLevel": "JAVA_17",
+    "client": [],
     "mixins": [
-        "AttributeContainerMixin",
-        "ClampedEntityAttributeMixin",
-        "DefaultAttributeContainerMixin",
-        "EntityAttributeInstanceMixin",
-        "EntityAttributeMixin",
-        "EntityAttributeModifierMixin",
-        "EntityTrackerEntryMixin",
+        "AttributeInstanceMixin",
+        "AttributeMapMixin",
+        "AttributeMixin",
+        "AttributeModifierMixin",
+        "AttributeSupplierMixin",
         "LivingEntityMixin",
-        "MinecraftServerMixin",
         "MobEntityMixin",
-        "PlayerEntityMixin",
+        "PlayerMixin",
+        "RangedAttributeMixin",
         "item.ArmorItemMixin",
         "item.ItemMixin",
-        "item.ItemStackMixin",
-        "item.MiningToolItemMixin",
-        "item.SwordItemMixin"
+        "item.ItemStackMixin"
     ],
     "injectors": {
         "defaultRequire": 1
-  }
+    }
 }

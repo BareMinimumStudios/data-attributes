@@ -1,101 +1,148 @@
 plugins {
-    id("fabric-loom")
-    kotlin("jvm") version "2.0.0"
-    kotlin("plugin.serialization") version "2.0.0"
-    java
     `maven-publish`
-    id("com.google.devtools.ksp") version "2.0.0-1.0.21"
+    kotlin("jvm") version libs.versions.kotlin
+    kotlin("plugin.serialization") version libs.versions.kotlin
+    alias(libs.plugins.cloche)
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_17
-java.targetCompatibility = JavaVersion.VERSION_17
-
-group = "${properties["maven_group"]}"
-version = "${properties["mod_version"]}-${properties["loader"]}"
-
-loom {
-    runConfigs.configureEach {
-        ideConfigGenerated(true)
-    }
-}
+group = "net.bms.data_attributes"
+version = "3.0.0"
 
 repositories {
-    maven("https://maven.wispforest.io/releases")
-    maven("https://maven.terraformersmc.com")
-    maven("https://api.modrinth.com/maven")
-    maven("https://maven.kosmx.dev/")
-    maven("https://maven.parchmentmc.org")
-    maven("https://maven.quiltmc.org/repository/release/")
-}
+    cloche.librariesMinecraft()
 
-dependencies {
-    minecraft("com.mojang:minecraft:${properties["minecraft_version"]}")
-
-    mappings("net.fabricmc:yarn:${properties["yarn_mappings"]}:v2")
-
-//    mappings {
-//        loom.layered {
-//            mappings("org.quiltmc:quilt-mappings:${properties["minecraft_version"]}+build.${properties["quilt_mappings_version"]}:intermediary-v2")
-//            officialMojangMappings()
-//            parchment("org.parchmentmc.data:parchment-${properties["parchment_version"]}@zip")
-//        }
-//    }
-
-    modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"]}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${properties["fabric_kotlin_version"]}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${properties["fabric_api_version"]}")
-
-    include("io.wispforest:owo-sentinel:${properties["owo_version"]}")
-
-    modImplementation("io.wispforest:endec:${properties["endec_version"]}")!!.let(::include)
-    modImplementation("io.wispforest.endec:netty:${properties["endec_netty_version"]}")!!.let(::include)
-
-    modImplementation("com.terraformersmc:modmenu:${properties["modmenu_version"]}") {
-        exclude("net.fabricmc.fabric-api")
+    cloche {
+        main()
+        mavenFabric()
+        mavenForge()
+        mavenNeoforgedMeta()
+        mavenNeoforged()
+        mavenParchment()
     }
 
-    annotationProcessor("io.github.llamalad7:mixinextras-fabric:${properties["mixinextras_version"]}")?.let {
-        implementation(it)
-        include(it)
+    maven("https://thedarkcolour.github.io/KotlinForForge/")
+    maven {
+        name = "FzzyMaven"
+        url = uri("https://maven.fzzyhmstrs.me/")
     }
-
-    modImplementation("io.wispforest:owo-lib:${properties["owo_version"]}")
-
-    implementation("com.google.devtools.ksp:symbol-processing-api:${properties["ksp_version"]}")
-    implementation("com.squareup:kotlinpoet-ksp:${properties["kotlinpoet_version"]}")
-
-    ksp("dev.kosmx.kowoconfig:ksp-owo-config:${properties["ksp_owo_config_version"]}")
+    mavenCentral()
 }
 
-tasks {
-    processResources {
-        inputs.property("version", project.version)
-        filesMatching("fabric.mod.json") {
-            expand("version" to project.version)
+cloche {
+    metadata {
+        modId = "data_attributes"
+        name = "Data Attributes"
+        description = "A data-driven entity attribute framework with datapack and server configuration support."
+        license = "BML-1.0"
+
+        author {
+            name = "karuzumi"
+            contact = "https://github.com/karuzumi"
+        }
+
+        url = "https://github.com/BareMinimumStudios/data-attributes"
+        sources = "https://github.com/BareMinimumStudios/data-attributes"
+        issues = "https://github.com/BareMinimumStudios/data-attributes/issues"
+
+    }
+
+    common {
+        mixins.from("src/main/data_attributes.mixins.json")
+
+        mappings {
+            official()
+        }
+
+        dependencies {
+            implementation(libs.kotlinx.serialization.json)
+            compileOnly(libs.mixinextras)
         }
     }
 
+    minecraftVersion = "1.21.1"
 
-    jar {
-        from("LICENSE")
-    }
+    neoforge {
+        loaderVersion = libs.versions.neoforge.loader
 
-    java {
-        withSourcesJar()
-    }
+        runs {
+            server()
+            client()
+        }
 
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                artifact(remapJar) {
-                    builtBy(remapJar)
+        dependencies {
+            modImplementation(libs.neoforge.language.kotlin)
+            modImplementation(libs.fzzy.config.neoforge)
+        }
+
+        metadata {
+            modLoader = "kotlinforforge"
+            loaderVersion {
+                start = libs.versions.neoforge.language.kotlin.get()
+            }
+            blurLogo = false
+            dependencies {
+                dependency {
+                    modId = "kotlinforforge"
+                    version(libs.versions.neoforge.language.kotlin.get())
                 }
-                artifact(kotlinSourcesJar) {
-                    builtBy(remapSourcesJar)
+                dependency {
+                    modId = "fzzy_config"
+                    version(libs.versions.fzzy.neoforge.get())
                 }
             }
         }
-
-        repositories {}
     }
+
+    fabric {
+        loaderVersion = libs.versions.fabric.loader
+
+        includedClient()
+
+        runs {
+            server()
+            client()
+        }
+
+        dependencies {
+            fabricApi(libs.versions.fabric.api)
+            modImplementation(libs.fabric.language.kotlin)
+            modImplementation(libs.fzzy.config.fabric)
+        }
+
+        metadata {
+            dependencies {
+                dependency {
+                    modId = "fabric-api"
+                    version(libs.versions.fabric.api.get())
+                }
+                dependency {
+                    modId = "fabric-language-kotlin"
+                    version(libs.versions.fabric.language.kotlin.get())
+                }
+                dependency {
+                    modId = "fzzy_config"
+                    version(libs.versions.fzzy.fabric.get())
+                }
+            }
+
+            entrypoint("main") {
+                adapter = "kotlin"
+                value = "net.bms.data_attributes.DataAttributesFabricEntrypoint"
+            }
+            entrypoint("client") {
+                adapter = "kotlin"
+                value = "net.bms.data_attributes.DataAttributesFabricClientEntrypoint"
+            }
+        }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs = listOf("-Xmulti-platform", "-Xno-check-actual", "-Xexpect-actual-classes")
+    }
+}
+
+dependencies {
+    testImplementation(kotlin("test"))
 }
