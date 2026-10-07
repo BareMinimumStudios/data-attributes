@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="https://cdn.modrinth.com/data/cached_images/464354cc9d34d3778ad4a9db3816adc86c0f6b84.png" alt="Data Attributes banner" />
+  <img src="docs/assets/data-attributes-banner.png" alt="Data Attributes banner" />
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="BML 1.0 License" src="https://img.shields.io/badge/LICENSE-BML%201.0-FFFFFF?style=for-the-badge&labelColor=1A1A1A" /></a>
+  <a href="https://github.com/BareMinimumStudios/data-attributes/blob/HEAD/LICENSE"><img alt="BML 1.0 License" src="https://img.shields.io/badge/LICENSE-BML%201.0-FFFFFF?style=for-the-badge&labelColor=1A1A1A" /></a>
   <a href="https://github.com/BareMinimumStudios/data-attributes/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/BareMinimumStudios/data-attributes?style=for-the-badge&logo=github&labelColor=1A1A1A&color=FFFFFF" /></a>
   <a href="https://github.com/BareMinimumStudios/data-attributes/forks"><img alt="GitHub forks" src="https://img.shields.io/github/forks/BareMinimumStudios/data-attributes?style=for-the-badge&logo=github&labelColor=1A1A1A&color=FFFFFF" /></a>
   <a href="https://github.com/BareMinimumStudios/data-attributes/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/BareMinimumStudios/data-attributes?style=for-the-badge&logo=github&label=ISSUES&labelColor=1A1A1A&color=FFFFFF" /></a>
@@ -11,8 +11,8 @@
 
 <p align="center">
   <a href="https://bareminimumstudios.github.io/Bare-Minimum-Docs/data-attributes/home/"><img alt="Documentation" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/generic_vector.svg" /></a>
-  <a href="https://www.curseforge.com/minecraft/mc-mods/data-attributes-directors-cut"><img alt="Available on CurseForge" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg" /></a>
-  <a href="https://modrinth.com/mod/data-attributes-directors-cut"><img alt="Available on Modrinth" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg" /></a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/dataattributes"><img alt="Available on CurseForge" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg" /></a>
+  <a href="https://modrinth.com/mod/dataattributes"><img alt="Available on Modrinth" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg" /></a>
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@ Data Attributes turns Minecraft's entity attribute system into something pack ma
 
 The mod does not add a new progression system or a pile of content on its own. It is the attribute layer underneath those systems: useful by itself for server customization, and useful to other mods that need more flexible attributes.
 
-This project continues the original [Data Attributes](https://modrinth.com/mod/data-attributes) by CleverNucleus. The continuation was previously distributed as **Data Attributes: Directors Cut**; the current source is maintained by Bare Minimum Studios.
+This project continues the original [Data Attributes](https://modrinth.com/mod/data-attributes) by CleverNucleus. Maintained by Bare Minimum Studios, this continuation is listed as **Data Attributes** on Modrinth and **Data Attributes: DC** on CurseForge.
 
 ## What you can configure
 
@@ -107,7 +107,7 @@ repositories {
 }
 
 dependencies {
-    modImplementation("curse.maven:data-attributes-directors-cut-955929:<file-id>")
+    modImplementation("curse.maven:dataattributes-955929:<file-id>")
 }
 ```
 
@@ -125,8 +125,8 @@ Build both targets with:
 - [Issues](https://github.com/BareMinimumStudios/data-attributes/issues)
 - [Configuration reference](CONFIGURATION.md)
 - [Documentation](https://bareminimumstudios.github.io/Bare-Minimum-Docs/data-attributes/home/)
-- [Modrinth](https://modrinth.com/mod/data-attributes-directors-cut)
-- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/data-attributes-directors-cut)
+- [Modrinth](https://modrinth.com/mod/dataattributes)
+- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/dataattributes)
 - [Original Data Attributes](https://modrinth.com/mod/data-attributes)
 
 ## Sponsor

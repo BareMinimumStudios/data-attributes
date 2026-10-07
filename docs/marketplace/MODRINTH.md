@@ -1,4 +1,4 @@
-![Data Attributes Banner](https://cdn.modrinth.com/data/cached_images/464354cc9d34d3778ad4a9db3816adc86c0f6b84.png)
+![Data Attributes Banner](https://raw.githubusercontent.com/BareMinimumStudios/data-attributes/HEAD/docs/assets/data-attributes-banner.png)
 
 # Data Attributes
 
@@ -8,7 +8,7 @@ Data Attributes makes Minecraft's attribute system much easier to shape without 
 
 It does not add a progression system or a collection of new content by itself. Think of it as the attribute layer that datapacks, servers, and other mods can build on.
 
-This project continues the original [Data Attributes](https://modrinth.com/mod/data-attributes) by CleverNucleus and was previously distributed as **Data Attributes: Directors Cut**.
+This project continues the original [Data Attributes](https://modrinth.com/mod/data-attributes) by CleverNucleus and is maintained by Bare Minimum Studios. It is listed as **Data Attributes** on Modrinth and **Data Attributes: DC** on CurseForge.
 
 ## Three separate layers
 
@@ -55,11 +55,13 @@ Datapack JSON changes use vanilla `/reload`. Manually changing Fzzy's JSON5 file
 ## Requirements
 
 **Fabric 1.21.1**
+
 - Fabric API
 - Fabric Language Kotlin
 - Fzzy Config
 
 **NeoForge 1.21.1**
+
 - Kotlin for Forge (NeoForge)
 - Fzzy Config
 
@@ -69,14 +71,20 @@ OWO Lib/OOLib, OWO Sentinel, and Endec are **not** required by the current sourc
 
 ## Links
 
-- **Source:** https://github.com/BareMinimumStudios/data-attributes
-- **Issues:** https://github.com/BareMinimumStudios/data-attributes/issues
-- **Configuration reference:** https://github.com/BareMinimumStudios/data-attributes/blob/HEAD/CONFIGURATION.md
-- **Documentation:** https://bareminimumstudios.github.io/Bare-Minimum-Docs/data-attributes/home/
-- **CurseForge:** https://www.curseforge.com/minecraft/mc-mods/data-attributes-directors-cut
-- **Original Data Attributes:** https://modrinth.com/mod/data-attributes
+- [Source](https://github.com/BareMinimumStudios/data-attributes)
+- [Issues](https://github.com/BareMinimumStudios/data-attributes/issues)
+- [Configuration reference](https://github.com/BareMinimumStudios/data-attributes/blob/HEAD/CONFIGURATION.md)
+- [Documentation](https://bareminimumstudios.github.io/Bare-Minimum-Docs/data-attributes/home/)
+- [Modrinth](https://modrinth.com/mod/dataattributes)
+- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/dataattributes)
+- [Original Data Attributes by CleverNucleus](https://modrinth.com/mod/data-attributes)
+
+## Sponsor
+
+[![Sponsor Banner](https://www.bisecthosting.com/partners/custom-banners/db76a74a-a111-4660-98b7-5a75c15a5951.png)](https://bisecthosting.com/bareminimum)
+
+Use code **`bareminimum`** to get **25% off your first month**!
 
 ## License
 
-Current Bare Minimum Studios releases use the **Bare Minimum License (BML) v1.0**:
-https://github.com/BareMinimumStudios/data-attributes/blob/HEAD/LICENSE
+Current Bare Minimum Studios releases use the **Bare Minimum License (BML) v1.0**. See the [license](https://github.com/BareMinimumStudios/data-attributes/blob/HEAD/LICENSE) for the full terms.

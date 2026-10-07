@@ -34,6 +34,7 @@ cloche {
         name = "Data Attributes"
         description = "A data-driven entity attribute framework with datapack and server configuration support."
         license = "BML-1.0"
+        icon = "assets/data_attributes/icon.png"
 
         author {
             name = "karuzumi"
