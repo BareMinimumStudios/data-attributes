@@ -55,7 +55,12 @@ jobs:
             build/libs/intermediates/*-fabric-*sources.jar
             build/libs/intermediates/*-fabric-*javadoc.jar
             build/libs/intermediates/*-fabric-*shadow.jar
-
+            
+          dependencies: |
+            fabric-api(required){modrinth:fabric-api}{curseforge:fabric-api}
+            fabric-language-kotlin(required){modrinth:fabric-language-kotlin}{curseforge:fabric-language-kotlin}
+            fzzy_config(required){modrinth:fzzy-config}{curseforge:fzzy-config}
+            
           version: fabric-${{ steps.meta.outputs.version }}
           game-versions: 1.21.1
           loaders: fabric
@@ -82,6 +87,10 @@ jobs:
             build/libs/intermediates/*-neoforge-*sources.jar
             build/libs/intermediates/*-neoforge-*javadoc.jar
             build/libs/intermediates/*-neoforge-*shadow.jar
+
+          dependencies: |
+            kotlinforforge(required){modrinth:kotlin-for-forge}{curseforge:kotlin-for-forge}
+            fzzy_config(required){modrinth:fzzy-config}{curseforge:fzzy-config}
 
           version: neoforge-${{ steps.meta.outputs.version }}
           game-versions: 1.21.1
