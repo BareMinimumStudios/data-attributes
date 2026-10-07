@@ -49,12 +49,8 @@ jobs:
           github-tag: ${{ steps.meta.outputs.version }}
           github-commitish: ${{ github.sha }}
 
-          files: build/libs/*-fabric-(1.21.1).jar
-          github-files: |
-            build/libs/intermediates/*-fabric-*dev.jar
-            build/libs/intermediates/*-fabric-*sources.jar
-            build/libs/intermediates/*-fabric-*javadoc.jar
-            build/libs/intermediates/*-fabric-*shadow.jar
+          files: build/libs/*-fabric.jar
+          github-files: build/libs/*-fabric.jar
             
           dependencies: |
             fabric-api(required){modrinth:fabric-api}{curseforge:fabric-api}
@@ -81,12 +77,8 @@ jobs:
           github-tag: ${{ steps.meta.outputs.version }}
           github-commitish: ${{ github.sha }}
 
-          files: build/libs/*-neoforge-(1.21.1).jar
-          github-files: |
-            build/libs/intermediates/*-neoforge-*dev.jar
-            build/libs/intermediates/*-neoforge-*sources.jar
-            build/libs/intermediates/*-neoforge-*javadoc.jar
-            build/libs/intermediates/*-neoforge-*shadow.jar
+          files: build/libs/*-neoforge.jar
+          github-files: build/libs/*-neoforge.jar
 
           dependencies: |
             kotlinforforge(required){modrinth:kotlin-for-forge}{curseforge:kotlin-for-forge}
